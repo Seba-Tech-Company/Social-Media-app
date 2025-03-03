@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Signup</title>
+  </head>
+
+
+  <body>
+    <div class="register">
+        <form class="signup">
+            <div class="form-control">
+                <div class="form-group">
+                    <label for="username">
+                        <input type="text" placeholder="Enter Your Username">
+                    </label>
+                </div><br>
+                <div class="form-group">
+                    <label for="email">
+                        <input type="email" placeholder="Enter Your Email">
+                    </label>
+                </div><br>
+                <div class="form-group">
+                    <label for="phone-number">
+                        <input type="phone" placeholder="Phone Number">
+                    </label>
+                </div><br>
+                <div class="form-group">
+                    <label for="password">
+                        <input type="password" placeholder="Enter password">
+                    </label>
+                </div><br>
+                <div class="form-group">
+                    <label for="password">
+                        <input type="password" placeholder="Confirm password">
+                    </label>
+                </div>
+                <button type="submit">Sign Up</button><br>
+                Already have an account <a href="{{ url_for('signin') }}">Login Here</a>
+            </div>
+            
+        </form>
+    </div>
+    
+  </body>
+</html>
