@@ -1,0 +1,125 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #ff9966, #ff5e62);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+    overflow: hidden;
+    animation: backgroundAnimation 8s infinite alternate;
+}
+
+@keyframes backgroundAnimation {
+    0% { background: linear-gradient(135deg, #ff66b3, #990a0c); }
+    100% { background: linear-gradient(135deg, #ff5e62, #001107); }
+}
+
+/* Floating Animation */
+@keyframes floating {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Main Container */
+.container {
+    z-index: 1;
+    max-width: 800px;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 30px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    animation: floating 4s infinite ease-in-out;
+    transition: transform 0.3s ease-in-out;
+}
+
+.container:hover {
+    transform: scale(1.05);
+}
+
+/* Branding */
+.brand {
+    color: #ffcc00;
+    font-weight: bold;
+    font-size: 2rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Auth Buttons */
+.auth-buttons {
+    margin-top: 20px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    margin: 10px;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-signin {
+    background: linear-gradient(90deg, #007bff, #00c3ff);
+    color: white;
+}
+
+.btn-signup {
+    background: linear-gradient(90deg, #28a745, #80e742);
+    color: white;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: left 0.4s;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn:hover {
+    transform: scale(1.1);
+}
+
+/* Features Section */
+.features {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.feature {
+    background: rgba(255, 255, 255, 0.3);
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+.feature:hover {
+    transform: scale(1.1);
+}
