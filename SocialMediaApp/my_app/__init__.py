@@ -1,37 +1,47 @@
-from flask import Flask, render_template
-from flask_pymongo import PyMongo
 import psycopg2
 import os
+from flask import Flask, render_template
+from flask_pymongo import PyMongo
+from psycopg2 import pool
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
 
 # PostgreSQL Credentials
-POSTGRES_URI = (
-    f"dbname='{os.getenv('POSTGRES_DB')}' "
-    f"user='{os.getenv('POSTGRES_USER')}' "
-    f"password='{os.getenv('POSTGRES_PASSWORD')}' "
-    f"host='{os.getenv('POSTGRES_HOST')}' "
-    f"port='{os.getenv('POSTGRES_PORT')}'"
-)
+POSTGRES_CONFIG = {
+    "dbname": os.getenv("POSTGRES_DB"),
+    "user": os.getenv("POSTGRES_USER"),
+    "password": os.getenv("POSTGRES_PASSWORD"),
+    "host": os.getenv("POSTGRES_HOST"),
+    "port": os.getenv("POSTGRES_PORT"),
+}
+
+# Initializing postgre connection pool
+postgres_pool = pool.SimpleConnectionPool(1, 10, **POSTGRES_CONFIG)
+
+def get_db_connection():
+    # Get a connection from the PostgreSQL pool
+    try:
+        return postgres_pool.getconn()
+    except Exception as e:
+        print(f"Error getting connection: {e}")
+        return None
+
+def release_db_connection(conn):
+    # Release a connection back to the pool
+    if conn:
+        postgres_pool.putconn(conn)
+
 
 # MongoDB Setup
 DB_NAME = "socialmedia"
 MONGO_URI = f"mongodb://localhost:27017/{DB_NAME}"
 mongo = PyMongo()
 
-def connect_postgres():
-    try:
-        conn = psycopg2.connect(POSTGRES_URI)
-        print("Connected to PostgreSQL successfully!")
-        return conn
-    except Exception as e:
-        print(f"PostgreSQL Connection Error: {e}")
-        return None
 
 def create_app():
-    # Initialize the Flask app.
+    # Initializing and configuring the flask app.
     app = Flask(__name__)
 
     # Load secret key from .env

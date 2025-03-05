@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <form class="signup">
+            <h2>Sign Up</h2>
+            <div class="form-group">
+                <input type="text" placeholder="Enter Your Username" required>
+            </div>
+            <div class="form-group">
+                <input type="email" placeholder="Enter Your Email" required>
+            </div>
+            <div class="form-group">
+                <input type="tel" placeholder="Phone Number" required>
+            </div>
+            <div class="form-group">
+                <input type="password" placeholder="Enter Password" required>
+            </div>
+            <div class="form-group">
+                <input type="password" placeholder="Confirm Password" required>
+            </div>
+            <button type="submit">Sign Up</button>
+            <div class="switch">
+                Already have an account? <a href="{{ url_for('signin') }}" class="rg">Login Here</a>
+            </div>
+        </form>
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
