@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feeds</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/feeds.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Welcome to Feeds</h2>
+
+        <!-- Post Form -->
+        <form action="{{ url_for('create_post') }}" method="POST">
+            <textarea name="content" placeholder="What's on your mind?" required></textarea>
+            <button type="submit">Post</button>
+        </form>
+
+        <!-- Display Posts -->
+        <div class="posts">
+            {% for post in posts %}
+            <div class="post">
+                <p><strong>{{ post.get("user", "Anonymous") }}</strong></p>
+                <p>{{ post.get("content") }}</p>
+                <p>Likes: <span id="likes-{{ post._id|string }}">{{ post.get("likes", 0) }}</span></p>
+                <button class="like-btn" data-id="{{ post._id|string }}">Like</button>
+
+                <!-- Comment Form -->
+                <form action="{{ url_for('add_comment', post_id=post._id|string) }}" method="POST">
+                    <input type="text" name="comment" placeholder="Add a comment..." required>
+                    <button type="submit">Comment</button>
+                </form>
+
+                <!-- Display Comments -->
+                <div class="comments">
+                    {% for comment in post.get("comments", []) %}
+                        <p>- {{ comment.get("text", "") }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/feeds.js') }}"></script>
+</body>
+</html>
