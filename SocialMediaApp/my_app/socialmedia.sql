@@ -7,10 +7,6 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-delete from users where id = 1
-
-select * from users
-
 CREATE TABLE posts (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
