@@ -8,26 +8,26 @@
 </head>
 <body>
     <div class="container">
-        <form class="signup">
+        <form class="signup" action="{{ url_for('auth.signup')}}" method="POST">
             <h2>Sign Up</h2>
             <div class="form-group">
-                <input type="text" placeholder="Enter Your Username" required>
+                <input type="text" placeholder="Enter Your Username" name="username" required>
             </div>
             <div class="form-group">
-                <input type="email" placeholder="Enter Your Email" required>
+                <input type="email" placeholder="Enter Your Email" name="email" required>
             </div>
             <div class="form-group">
-                <input type="tel" placeholder="Phone Number" required>
+                <input type="tel" placeholder="Phone Number" name="phone" required>
             </div>
             <div class="form-group">
-                <input type="password" placeholder="Enter Password" required>
+                <input type="password" placeholder="Enter Password" name="password" required>
             </div>
             <div class="form-group">
-                <input type="password" placeholder="Confirm Password" required>
+                <input type="password" placeholder="Confirm Password" name="password" required>
             </div>
             <button type="submit">Sign Up</button>
             <div class="switch">
-                Already have an account? <a href="{{ url_for('signin') }}" class="rg">Login Here</a>
+                Already have an account? <a href="{{ url_for('auth.signin') }}" class="rg">Login Here</a>
             </div>
         </form>
     </div>
