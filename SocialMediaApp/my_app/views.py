@@ -1,48 +1,74 @@
-# Handles everything to do with how the user will be interacting with the application
-from flask import Blueprint, render_template, url_for, request, jsonify, session, redirect
-from my_app.db import get_db_connection, mongo
+import os
+from flask import (
+    Blueprint, request, jsonify, session, redirect, url_for, flash,
+    current_app, render_template
+)
+from werkzeug.utils import secure_filename
+from datetime import datetime
+from my_app.db import mongo
 
-user_blueprint = Blueprint('user', __name__, url_prefix='/')
+# Define the Blueprint
+user_blueprint = Blueprint("user", __name__)
 
+# Configure upload folder and allowed extensions
+UPLOAD_FOLDER = os.path.join("static", "uploads")
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "mp4", "mov", "avi"}
 
-# Test PostgreSQL connection route
-@user_blueprint.route("/test")
-def test_postgres():
-    # Establish connection to PostgreSQL
-    conn = get_db_connection()
-    
-    if not conn:
-        return "Error while connecting to PostgreSQL!", 500
+# Ensure upload directory exists
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@user_blueprint.route("/create_post", methods=["POST"])
+def create_post():
+    if "user_id" not in session:
+        return redirect(url_for("auth.signin"))
+
+    post_content = request.form.get("content", "").strip()
+    media_file = request.files.get("media")
+    media_filename = None
+
+    # Handle media file upload
+    if media_file and allowed_file(media_file.filename):
+        filename = secure_filename(media_file.filename)
+        media_path = os.path.join(UPLOAD_FOLDER, filename)
+        
+        try:
+            media_file.save(media_path)
+            media_filename = filename
+        except Exception as e:
+            flash(f"Error saving file: {e}", "danger")
+            return redirect(url_for("user.feeds"))
+
+    post_data = {
+        "user_id": session["user_id"],
+        "content": post_content,
+        "media": media_filename,  # Store media filename
+        "timestamp": datetime.utcnow(),
+        "likes": 0,
+        "comments": [],
+    }
 
     try:
-        # Execute a sample query to ensure the connection works
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM users LIMIT 1")  # Assuming a "users" table exists
-        result = cur.fetchone()
-
-        if result:
-            return f"Connected to PostgreSQL! User data: {result}", 200
-        else:
-            return "No user data found in PostgreSQL!", 404
-
+        mongo.db.posts.insert_one(post_data)
+        flash("Post created successfully!", "success")
     except Exception as e:
-        return f"Error while querying PostgreSQL: {e}", 500
+        flash(f"Error creating post: {e}", "danger")
 
-    finally:
-        cur.close()
-        conn.close()
+    return redirect(url_for("user.feeds"))
 
-@user_blueprint.route("/")
-def home():
-    if "user_id" in session:
-        return redirect(url_for("user.feeds"))
-    return render_template("index.html")
-
-
+# Feeds route to display posts
 @user_blueprint.route("/feeds")
 def feeds():
     if "user_id" not in session:
         return redirect(url_for("auth.signin"))
 
-    posts = list(mongo.db.posts.find().sort("_id", -1))  
+    try:
+        posts = list(mongo.db.posts.find().sort("timestamp", -1))  #
+    except Exception as e:
+        flash(f"Error fetching posts: {e}", "danger")
+        posts = []
+
     return render_template("feeds.html", posts=posts)

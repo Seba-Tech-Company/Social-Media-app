@@ -7,41 +7,101 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/feeds.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h2>Welcome to Feeds</h2>
+    <div class="instagram-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>The Verse</h2>
+            <ul>
+                <li><a href="{{ url_for('user.feeds') }}">Home</a></li>
+                <li><a href="#">Search</a></li>
+                <li><a href="#">Explore</a></li>
+                <li><a href="#">Reels</a></li>
+                <li><a href="#">Messages</a></li>
+                <li><a href="#">Notifications</a></li>
+                <li><a href="#">Create</a></li>
+                <li><a href="{{ url_for('user.feeds') }}">Profile</a></li>
+            </ul>
+        </div>
 
-        <!-- Post Form -->
-        <form action="{{ url_for('user.test_postgres') }}" method="POST">
-            <textarea name="content" placeholder="What's on your mind?" required></textarea>
-            <button type="submit">Post</button>
-        </form>
-
-        <!-- Display Posts -->
-        <div class="posts">
-            {% for post in posts %}
-            <div class="post">
-                <p><strong>{{ post.get("user", "Anonymous") }}</strong></p>
-                <p>{{ post.get("content") }}</p>
-                <p>Likes: <span id="likes-{{ post._id|string }}">{{ post.get("likes", 0) }}</span></p>
-                <button class="like-btn" data-id="{{ post._id|string }}">Like</button>
-
-                <!-- Comment Form -->
-                <form action="{{ url_for('add_comment', post_id=post._id|string) }}" method="POST">
-                    <input type="text" name="comment" placeholder="Add a comment..." required>
-                    <button type="submit">Comment</button>
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Post Form -->
+            <div class="create-post">
+                <form action="{{ url_for('user.create_post') }}" method="POST" enctype="multipart/form-data">
+                    <textarea name="content" placeholder="What's on your mind?" required></textarea>
+                    <input type="file" name="media" accept="image/*, video/*">
+                    <button type="submit">Post</button>
                 </form>
-
-                <!-- Display Comments -->
-                <div class="comments">
-                    {% for comment in post.get("comments", []) %}
-                        <p>- {{ comment.get("text", "") }}</p>
-                    {% endfor %}
-                </div>
             </div>
-            {% endfor %}
+
+            <!-- Posts Section -->
+            <div class="posts">
+                {% for post in posts %}
+                <div class="post">
+                    <div class="post-header">
+                        <p><strong>{{ post.get("user", "Bonnie") }}</strong> - {{ post.get("timestamp", "").strftime('%Y-%m-%d %H:%M') if post.get("timestamp") else "Just now" }}</p>
+                    </div>
+                    
+                    <div class="post-content">
+                        <p>{{ post.get("content") }}</p>
+
+                        {% if post.get("media") %}
+                            {% if post["media"].endswith(('.jpg', '.jpeg', '.png', '.gif')) %}
+                                <img src="{{ url_for('static', filename='uploads/' + post['media']) }}" alt="Post Image" class="post-media">
+                            {% elif post["media"].endswith(('.mp4', '.mov', '.avi')) %}
+                                <video controls class="post-media">
+                                    <source src="{{ url_for('static', filename='uploads/' + post['media']) }}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Post Actions -->
+                    <div class="post-actions">
+                        <p>Likes: <span id="likes-{{ post['_id'] }}">{{ post.get("likes", 0) }}</span></p>
+                        <button class="like-btn" data-id="{{ post['_id'] }}">Like</button>
+                    </div>
+
+                    <!-- Comment Section -->
+                    <div class="comment-section">
+                        <form action="{{ url_for('user.create_post', post_id=post['_id']) }}" method="POST">
+                            <input type="text" name="comment" placeholder="Add a comment..." required>
+                            <button type="submit">Comment</button>
+                        </form>
+
+                        <!-- Display Comments -->
+                        <div class="comments">
+                            {% for comment in post.get("comments", []) %}
+                                <p><strong>{{ comment.get("user", "Anonymous") }}:</strong> {{ comment.get("text", "") }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Suggested Users Section -->
+        <div class="suggested-section">
+            <h2>Suggested for you</h2>
+            <ul>
+                <li>bonnieseba <button>Follow</button></li>
+                <li>felix12 <button>Follow</button></li>
+                <li>kelvinnyale <button>Follow</button></li>
+                <li>hannahwanja <button>Follow</button></li>
+                <li>mellajoy2 <button>Follow</button></li>
+            </ul>
         </div>
     </div>
-    
+
+    <!-- Footer -->
+    <footer>
+        <p>About: Help, Press, API, Jobs, Privacy Terms</p>
+        <p>Seba Verified</p>
+        <p>&copy; 2025 The Verse from Seba</p>
+    </footer>
+
     <script src="{{ url_for('static', filename='js/feeds.js') }}"></script>
 </body>
 </html>

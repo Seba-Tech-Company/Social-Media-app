@@ -1,8 +1,7 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
+from flask import Flask
 from flask_login import LoginManager, UserMixin
 from bson.objectid import ObjectId
-from datetime import datetime
 from dotenv import load_dotenv
 from my_app.db import mongo, get_db_connection, release_db_connection, MONGO_URI
 
@@ -12,8 +11,13 @@ load_dotenv()
 # Flask App Factory
 def create_app():
     app = Flask(__name__)
+
+    # Configure Flask app
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
     app.config["MONGO_URI"] = MONGO_URI
+    app.config["UPLOAD_FOLDER"] = "static/uploads"  
+
+    # Initialize MongoDB
     mongo.init_app(app)
 
     # Register blueprints
@@ -23,19 +27,19 @@ def create_app():
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(user_blueprint)
 
-    # Ensure MongoDB Indexing
+    # Ensure MongoDB Indexing ✅ Fixed wrong field
     with app.app_context():
-        mongo.db.posts.create_index([("created_at", -1)])
+        mongo.db.posts.create_index([("timestamp", -1)])  
 
-    # Redirecting anyone who is not logged in to the home page
-    login_manager = LoginManager(app)
-    login_manager.login_view = 'user.home'
+    # Set up Flask-Login
+    login_manager = LoginManager()
+    login_manager.login_view = "auth.signin"
     login_manager.init_app(app)
 
-    # User loader function
+    # User loader function for authentication
     @login_manager.user_loader
     def load_user(user_id):
-        conn = get_db_connection()  # Get a connection from the pool created in db.py
+        conn = get_db_connection()  # Get a PostgreSQL connection
         if not conn:
             return None
 
@@ -45,7 +49,6 @@ def create_app():
             user_data = cur.fetchone()
 
             if user_data:
-                # Create a simple User class Flask-Login can use
                 class User(UserMixin):
                     def __init__(self, id, username, email):
                         self.id = id
@@ -64,6 +67,6 @@ def create_app():
 
         finally:
             conn.commit()
-            conn.close()
+            release_db_connection(conn)  
 
     return app
