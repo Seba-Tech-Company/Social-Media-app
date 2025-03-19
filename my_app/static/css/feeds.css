@@ -1,0 +1,181 @@
+/* General Styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #d4b630;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.instagram-container {
+    display: flex;
+    width: 80%;
+    max-width: 1200px;
+    margin-top: 20px;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 20%;
+    padding: 20px;
+    background-color: #32cc1e;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar h2 {
+    color: #fff;
+    text-align: center;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    padding: 15px 0;
+}
+
+.sidebar ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+    transition: 0.3s;
+}
+
+.sidebar ul li a:hover {
+    color: #ccc;
+}
+
+/* Main Content */
+.main-content {
+    width: 50%;
+    margin-left: 22%;
+    padding: 20px;
+}
+
+.create-post textarea {
+    width: 100%;
+    padding: 10px;
+    background: #222;
+    border: none;
+    color: #fff;
+    border-radius: 5px;
+    resize: none;
+}
+
+.create-post button {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.create-post button:hover {
+    background: #0056b3;
+}
+
+/* Posts */
+.post {
+    background: #111;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 10px;
+}
+
+.post-header {
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.post-actions {
+    margin-top: 10px;
+}
+
+.like-btn {
+    background: transparent;
+    color: #007bff;
+    border: none;
+    cursor: pointer;
+}
+
+.like-btn:hover {
+    color: #0056b3;
+}
+
+/* Comments */
+.comment-section input {
+    width: 80%;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+}
+
+.comment-section button {
+    padding: 8px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+}
+
+/* Suggested Section */
+.suggested-section {
+    width: 20%;
+    padding: 20px;
+    position: fixed;
+    right: 0;
+    top: 0;
+    background: #1fb92c;
+    height: 100vh;
+}
+
+.suggested-section h2 {
+    font-size: 18px;
+    color: #fff;
+}
+
+.suggested-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.suggested-section ul li {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+}
+
+.suggested-section button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.suggested-section button:hover {
+    background: #0056b3;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 10px;
+    font-size: 14px;
+    color: #777;
+    position: relative;
+    width: 100%;
+    margin-bottom: 70px;
+}

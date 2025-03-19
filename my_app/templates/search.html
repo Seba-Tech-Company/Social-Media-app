@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}">
+</head>
+<body>
+    <div class="search-container hidden">
+        <h2>Search</h2>
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="Search...">
+            <button id="clear-search">&#10006;</button>
+        </div>
+        <div class="recent-searches">
+            <h3>Recent</h3>
+            <p id="no-recent">No recent searches.</p>
+            <ul id="recent-list"></ul>
+        </div>
+    </div>
+
+    <button id="toggle-search">🔍</button>
+
+    <script src="{{ url_for('static', filename='js/search.js') }}"></script>
+</body>
+</html>
