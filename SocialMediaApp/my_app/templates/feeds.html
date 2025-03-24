@@ -10,76 +10,107 @@
     <div class="instagram-container">
         <!-- Sidebar -->
         <div class="sidebar">
-            <h2>The Verse</h2>
+            <h2><i>The Verse</i></h2>
             <ul>
-                <li><a href="{{ url_for('user.feeds') }}">Home</a></li>
-                <li><a href="#">Search</a></li>
-                <li><a href="#">Explore</a></li>
-                <li><a href="#">Reels</a></li>
-                <li><a href="#">Messages</a></li>
-                <li><a href="#">Notifications</a></li>
-                <li><a href="#">Create</a></li>
-                <li><a href="{{ url_for('user.feeds') }}">Profile</a></li>
+                <li><a href="{{ url_for('user.get_feed') }}">Home</a></li>
+                <li><a href="{{ url_for('user.get_feed') }}">Profile</a></li>
+                <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+
             </ul>
         </div>
 
         <!-- Main Content -->
         <div class="main-content">
+            <div class="profile">
+                <p>Logged in as {{ username }}</p>
+            </div>
             <!-- Post Form -->
             <div class="create-post">
                 <form action="{{ url_for('user.create_post') }}" method="POST" enctype="multipart/form-data">
-                    <textarea name="content" placeholder="What's on your mind?" required></textarea>
-                    <input type="file" name="media" accept="image/*, video/*">
+                    <textarea name="content" placeholder="Write something..." required></textarea>
+                    <input type="file" name="media">
                     <button type="submit">Post</button>
                 </form>
             </div>
-
             <!-- Posts Section -->
             <div class="posts">
                 {% for post in posts %}
                 <div class="post">
                     <div class="post-header">
-                        <p><strong>{{ post.get("user", "Bonnie") }}</strong> - {{ post.get("timestamp", "").strftime('%Y-%m-%d %H:%M') if post.get("timestamp") else "Just now" }}</p>
+                        <p><strong>{{ post.username if post.username else '' }}</strong></p>
                     </div>
                     
                     <div class="post-content">
-                        <p>{{ post.get("content") }}</p>
-
                         {% if post.get("media") %}
                             {% if post["media"].endswith(('.jpg', '.jpeg', '.png', '.gif')) %}
-                                <img src="{{ url_for('static', filename='uploads/' + post['media']) }}" alt="Post Image" class="post-media">
+                                <img src="{{ post.media_url }}" alt="Post Image">
                             {% elif post["media"].endswith(('.mp4', '.mov', '.avi')) %}
                                 <video controls class="post-media">
-                                    <source src="{{ url_for('static', filename='uploads/' + post['media']) }}" type="video/mp4">
+                                    <source src="{{ post['media_url'] }}" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>
                             {% endif %}
                         {% endif %}
                     </div>
-
-                    <!-- Post Actions -->
-                    <div class="post-actions">
-                        <p>Likes: <span id="likes-{{ post['_id'] }}">{{ post.get("likes", 0) }}</span></p>
-                        <button class="like-btn" data-id="{{ post['_id'] }}">Like</button>
+                    <div class="post-caption">
+                        <p style="font-size: 18px">{{ post.get("content") }}</p>
                     </div>
 
-                    <!-- Comment Section -->
-                    <div class="comment-section">
-                        <form action="{{ url_for('user.create_post', post_id=post['_id']) }}" method="POST">
-                            <input type="text" name="comment" placeholder="Add a comment..." required>
-                            <button type="submit">Comment</button>
-                        </form>
+                    <div class="post-time">
+                        <p>{{ post.get("timestamp", "").strftime('%Y-%m-%d %H:%M') if post.get("timestamp") else "Just now" }}</p>
+                    </div>
 
-                        <!-- Display Comments -->
-                        <div class="comments">
-                            {% for comment in post.get("comments", []) %}
-                                <p><strong>{{ comment.get("user", "Anonymous") }}:</strong> {{ comment.get("text", "") }}</p>
-                            {% endfor %}
-                        </div>
+
+                    <!-- Like/Unlike Button -->
+                    <button class="like-btn" data-id="{{ post._id }}">
+                        {% if post.liked_by_user %}
+                            Unlike
+                        {% else %}
+                            Like
+                        {% endif %}
+                    </button>
+                    <span id="likes-{{ post._id }}">{{ post.likes }}</span> Likes
+
+
+                    <!-- Reply to Post -->
+                    <button class="reply-to-post-btn" data-id="{{ post._id }}">Reply</button>
+                    <div class="reply-to-post-form" id="reply-form-{{ post._id }}" style="display: none;">
+                        <input type="text" class="reply-input" id="reply-input-{{ post._id }}" placeholder="Write a reply...">
+                        <button class="submit-reply-btn" data-id="{{ post._id }}">Post Reply</button>
+                    </div>
+
+                    <!-- Post Comments Section -->
+                    <div id="comments-section">
+                        {% for comment in post.get("comments", []) %}
+                            <div class="comment">
+                                <p><strong>{{ comment.get("username", "Anonymous") }}:</strong> {{ comment.get("content", "") }}</p>
+
+                                <button class="like-comment-btn" data-id="{{ comment.comment_id }}" data-post-id="{{ post._id }}">
+                                    Like
+                                </button>
+                                <span id="comment-likes-{{ comment.comment_id }}">{{ comment.get("likes", 0) }}</span> Likes
+
+                                <button class="reply-btn" data-id="{{ comment.comment_id }}" data-post="{{ post._id }}">Reply</button>
+
+                                <!-- Nested Replies -->
+                                <div class="replies">
+                                    {% for reply in comment.get("replies", []) %}
+                                        <div class="reply">
+                                            <p><strong>{{ reply.get("username", "Anonymous") }}:</strong> {{ reply.get("content", "") }}</p>
+
+                                            <button class="like-comment-btn" data-id="{{ reply._id }}">Like</button>
+                                            <span id="likes-{{ reply._id }}">{{ reply.get("likes", 0) }}</span> Likes
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
                 {% endfor %}
             </div>
+
+
         </div>
 
         <!-- Suggested Users Section -->
@@ -103,5 +134,178 @@
     </footer>
 
     <script src="{{ url_for('static', filename='js/feeds.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+        // Show reply input when clicking reply button
+        document.querySelectorAll(".reply-to-post-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                let postId = this.getAttribute("data-id");
+                let replyForm = document.getElementById(`reply-form-${postId}`);
+                replyForm.style.display = (replyForm.style.display === "none" || replyForm.style.display === "") ? "block" : "none";
+            });
+        });
+
+        // Handle reply submission
+        document.querySelectorAll(".submit-reply-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                let postId = this.getAttribute("data-id");
+                let replyContent = document.getElementById(`reply-input-${postId}`).value.trim();
+
+                if (replyContent === "") {
+                    alert("Reply cannot be empty!");
+                    return;
+                }
+
+                let requestData = {
+                    user_id: "{{ current_user.get_id() }}",
+                    post_id: postId,
+                    content: replyContent
+                };
+
+                console.log("Sending Data:", requestData); // Debugging log
+
+                fetch("/comment", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Full Response:", data); // Debugging log
+
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert("Failed to post reply: ");
+                    }
+                })
+                .catch(error => {
+                    console.error("Fetch Error:", error);
+                    alert("Failed to post reply: Network error.");
+                });
+            });
+        });
+
+        // Handle Likes
+        document.querySelectorAll(".like-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                let postId = this.getAttribute("data-id");
+                let userId = "{{ current_user.get_id() }}";
+                console.log(postId, userId)
+
+                fetch("/like", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ user_id: userId, post_id: postId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        this.innerText = data.liked ? "Unlike" : "Like"; // Toggle button text
+                        document.getElementById(`likes-${postId}`).innerText = data.like_count; // Update like count
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+            });
+        });
+
+
+        // Handle Comments
+        document.querySelectorAll(".comment-form").forEach(form => {
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+                let postId = this.getAttribute("data-post-id");
+                let commentText = this.querySelector("input[name='comment']").value;
+                const userId = "{{ current_user.get_id() }}";
+
+                fetch("/comment", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ user_id: userId, post_id: postId, content: commentText })  // Replace `1` with actual user_id
+                })
+                .then(response => response.json())
+                .then(data => {
+                    let commentSection = document.getElementById(`comments-${postId}`);
+                    let newComment = document.createElement("p");
+                    newComment.innerHTML = `<strong>You:</strong> ${commentText}`;
+                    commentSection.appendChild(newComment);
+                    form.reset();
+                })
+                .catch(error => console.error("Error:", error));
+            });
+        });
+
+        document.querySelectorAll(".reply-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                let commentId = this.getAttribute("data-id");
+                let postId = this.getAttribute("data-post");
+                console.log("Replying to Comment ID:", commentId);  // Debug log
+                console.log("Under Post ID:", postId);
+
+                let replyText = prompt("Write your reply:");
+                const userId = "{{ current_user.get_id() }}";
+
+                if (!commentId) {
+                    alert("Error: Missing parent comment ID!");
+                    return;
+                }
+
+                console.log("userId")
+
+                if (replyText) {
+                    fetch("/reply", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            user_id: userId,
+                            post_id: postId,
+                            content: replyText,
+                            parent_comment_id: commentId  // Ensure correct ID is sent
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert("Failed to post reply.");
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+                }
+            });
+        });
+
+
+        document.querySelectorAll(".like-comment-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                let commentId = this.getAttribute("data-id");
+                const userId = "{{ current_user.get_id() }}";
+
+                fetch("/like_comment", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ user_id: userId, comment_id: commentId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message.includes("liked")) {
+                        this.innerText = "Unlike";
+                    } else {
+                        this.innerText = "Like";
+                    }
+                    document.getElementById(`comment-likes-${commentId}`).innerText = data.likes;
+                })
+                .catch(error => console.error("Error:", error));
+            });
+        });
+
+        });
+
+
+    </script>
 </body>
 </html>

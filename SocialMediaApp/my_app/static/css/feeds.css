@@ -95,8 +95,23 @@ body {
 }
 
 .post-header {
-    font-size: 14px;
+    font-size: 18px;
     margin-bottom: 10px;
+    display: flex;
+    flex-direction: row;
+}
+
+.post-content {
+    background: #FCF7F8;
+}
+
+.post-content img {
+    width: 100%;
+    height: 100%;
+}
+
+.post-time {
+    font-size: 14px;
 }
 
 .post-actions {
@@ -128,6 +143,10 @@ body {
     color: #fff;
     border: none;
     border-radius: 5px;
+}
+
+.reply {
+    margin-left: 1.5rem;
 }
 
 /* Suggested Section */

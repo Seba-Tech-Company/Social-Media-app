@@ -2,6 +2,8 @@
 from flask import Blueprint, render_template, url_for, request, redirect, session, jsonify, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from my_app.db import get_db_connection
+from flask_login import login_user, logout_user, login_required, current_user
+from my_app.__init__ import User
 
 
 # Create a blueprint which is to be registered in the init file
@@ -30,14 +32,14 @@ def signup():
         
         try:
             cur = conn.cursor()
-            cur.execute("SELECT id FROM users WHERE email = %s", (email,))
+            cur.execute("SELECT user_id FROM users WHERE email = %s", (email,))
             if cur.fetchone():
                 flash("The email provided already exist!", category='error')
 
-            cur.execute("INSERT INTO users (username, email, phone, password) VALUES (%s, %s, %s, %s) RETURNING id", (username, email, phone, hashed_password))
+            cur.execute("INSERT INTO users (username, email, phone, password) VALUES (%s, %s, %s, %s) RETURNING user_id", (username, email, phone, hashed_password))
             session["user_id"] = cur.fetchone()[0]
             conn.commit()
-            return redirect(url_for("user.feeds"))
+            return redirect(url_for("user.get_feed"))
         finally:
             cur.close()
             conn.close()
@@ -55,24 +57,33 @@ def signin():
         conn = get_db_connection()
         if not conn:
             flash("Database connection failed!", category='error')
-        
+            return redirect(url_for("auth.signin"))
+
         try:
             cur = conn.cursor()
-            cur.execute("SELECT id, password FROM users WHERE email = %s", (email,))
-            user = cur.fetchone()
-            
-            if user and check_password_hash(user[1], password):
-                session["user_id"] = user[0]
-                return redirect(url_for("user.feeds"))
+            cur.execute("SELECT user_id, username, password, email FROM users WHERE email = %s", (email,))
+            user_data = cur.fetchone()
 
-            flash("Invalid credentials!", category='error')
+            if user_data and check_password_hash(user_data[2], password):  # user_data[2] = hashed password
+                user = User(user_data[0], user_data[1], user_data[3])  # Convert tuple to User object
+                login_user(user, remember=True)
+
+                flash("Login successful!", category='success')
+                return redirect(url_for("user.get_feed"))  # Redirect to feed
+
+            flash("Invalid email or password!", category='error')
+
         finally:
             cur.close()
             conn.close()
 
-    return render_template("Signin.html")
+    return render_template("Signin.html", user=current_user)
 
-@auth_blueprint.route("/signout")
-def signout():
-    session.pop("user_id", None)
-    return redirect(url_for("user.home"))
+
+
+@auth_blueprint.route("/logout")
+@login_required
+def logout():
+    logout_user()  # Logs out the current user
+    flash("You have been logged out!", category="info")
+    return redirect(url_for("auth.signin"))
